@@ -1,0 +1,11 @@
+Flask
+pytesseract
+Pillow
+opencv-python
+pyttsx3
+gunicorn
+Werkzeug
+python-dotenv
+gTTS
+celery
+redis
