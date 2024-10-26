@@ -1,0 +1,8 @@
+FLASK_ENV=development
+SECRET_KEY=your_secret_key_here
+UPLOAD_FOLDER=static/uploads
+ALLOWED_EXTENSIONS=png,jpg,jpeg,gif
+TESSERACT_CMD=/usr/local/bin/tesseract
+LOG_FILE=logs/app.log
+BROKER_URL=redis://redis:6379/0
+RESULT_BACKEND=redis://redis:6379/0
