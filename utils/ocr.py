@@ -2,7 +2,7 @@ import pytesseract
 from PIL import Image
 import cv2
 import os
-from config import Config
+from celery import current_app as celery_app  # Import Celery's current app
 
 class OCRProcessor:
     """
@@ -14,8 +14,8 @@ class OCRProcessor:
         Initializes the OCRProcessor class.
         """
         # If TESSERACT_CMD is specified, set the tesseract command path
-        if Config.TESSERACT_CMD:
-            pytesseract.pytesseract.tesseract_cmd = Config.TESSERACT_CMD
+        tesseract_cmd = celery_app.conf.get('TESSERACT_CMD', '/usr/bin/tesseract')
+        pytesseract.pytesseract.tesseract_cmd = tesseract_cmd
 
     def preprocess_image(self, image_path):
         """

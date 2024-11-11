@@ -15,9 +15,24 @@ app.config.from_object(Config)
 # Configure logging
 logging.basicConfig(filename=app.config['LOG_FILE'], level=logging.INFO)
 
+# Function to initialize Celery with Flask app context
+def make_celery(app):
+    celery = Celery(
+        app.import_name,
+        broker=app.config['BROKER_URL'],
+        backend=app.config['RESULT_BACKEND']
+    )
+    # Explicitly set the configuration
+    celery.conf.update(app.config)
+    
+    # Ensure TESSERACT_CMD is set in the Celery worker environment
+    if 'TESSERACT_CMD' in app.config:
+        celery.conf.update({'TESSERACT_CMD': app.config['TESSERACT_CMD']})
+    
+    return celery
+
 # Initialize Celery
-celery = Celery(app.name, broker=app.config['BROKER_URL'])
-celery.conf.update(app.config)
+celery = make_celery(app)
 
 # Allowed file extensions for upload
 ALLOWED_EXTENSIONS = set(app.config['ALLOWED_EXTENSIONS'].split(','))

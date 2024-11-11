@@ -26,6 +26,6 @@ services:
       - RESULT_BACKEND=redis://redis:6379/0
 
   redis:
-    image: redis:6.2.5
+    image: redis:5
     ports:
       - "6379:6379"
