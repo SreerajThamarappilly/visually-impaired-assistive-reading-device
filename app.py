@@ -9,6 +9,7 @@ from config import Config
 import logging
 from celery import Celery
 from celery.result import AsyncResult
+from uuid import UUID
 
 # Initialize Flask application
 app = Flask(__name__)
@@ -24,7 +25,6 @@ def make_celery(app):
         broker=app.config['BROKER_URL'],
         backend=app.config['RESULT_BACKEND']
     )
-    # Explicitly set the configuration
     celery.conf.update(app.config)
 
     # Ensure TESSERACT_CMD is set in the Celery worker environment
@@ -48,6 +48,16 @@ def allowed_file(filename):
     return '.' in filename and \
            filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
+def validate_task_id(task_id):
+    """
+    Validate if the provided task_id is a valid UUID.
+    """
+    try:
+        UUID(task_id, version=4)
+        return True
+    except ValueError:
+        return False
+
 @app.route('/api/v1/process_image', methods=['POST'])
 def process_image():
     """
@@ -55,13 +65,13 @@ def process_image():
     """
     if 'image' not in request.files:
         logging.error('No image part in the request')
-        return jsonify({'error': 'No image part in the request'}), 400
+        return jsonify({"status": "error", "error": {"code": 400, "message": "No image part in the request"}}), 400
 
     file = request.files['image']
 
     if file.filename == '':
         logging.error('No selected file')
-        return jsonify({'error': 'No selected file'}), 400
+        return jsonify({"status": "error", "error": {"code": 400, "message": "No selected file"}}), 400
 
     if file and allowed_file(file.filename):
         filename = secure_filename(file.filename)
@@ -70,37 +80,48 @@ def process_image():
 
         # Asynchronously process the image
         task = process_image_task.delay(image_path, filename)
-        return jsonify({'task_id': task.id}), 202
+        return jsonify({"status": "success", "data": {"task_id": task.id}}), 202
     else:
         logging.error('Invalid file type')
-        return jsonify({'error': 'Invalid file type'}), 400
+        return jsonify({"status": "error", "error": {"code": 400, "message": f"Invalid file type. Allowed types are {', '.join(ALLOWED_EXTENSIONS)}"}}), 400
 
 @app.route('/api/v1/task_status/<task_id>', methods=['GET'])
 def task_status(task_id):
     """
     API endpoint to get the status of a background task.
     """
+    # Validate the task_id format
+    if not validate_task_id(task_id):
+        return jsonify({"status": "error", "error": {"code": 400, "message": "Invalid task ID format"}}), 400
+
     task_result = AsyncResult(task_id, app=celery)
 
     if task_result.state == 'PENDING':
         response = {
-            'state': task_result.state,
-            'status': 'Pending...'
+            "status": "success",
+            "data": {
+                "state": task_result.state,
+                "status": "Pending..."
+            }
         }
     elif task_result.state != 'FAILURE':
         response = {
-            'state': task_result.state,
-            'status': task_result.info.get('status', ''),
-            'result': task_result.info.get('result', '')
+            "status": "success",
+            "data": {
+                "state": task_result.state,
+                "status": task_result.info.get('status', ''),
+                "result": task_result.info.get('result', '')
+            }
         }
         if 'result' in task_result.info:
-            # Provide the URL to download the audio file
-            response['download_url'] = url_for('static', filename='uploads/' + task_result.info['result'], _external=True)
+            response["data"]['download_url'] = url_for('static', filename='uploads/' + task_result.info['result'], _external=True)
     else:
-        # Something went wrong in the background job
         response = {
-            'state': task_result.state,
-            'status': str(task_result.info)
+            "status": "error",
+            "error": {
+                "code": 500,
+                "message": str(task_result.info)
+            }
         }
     return jsonify(response)
 
