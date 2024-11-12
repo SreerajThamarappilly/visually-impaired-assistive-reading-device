@@ -77,6 +77,17 @@ assistive_reading_device/
     - 400 Bad Request: If the image is not provided or invalid.
     - 500 Internal Server Error: If an unexpected error occurs.
 
+```bash
+POST API : http://localhost:8000/api/v1/process_image
+Sample Request Body form-data: image (File) = Welcome.jpg (uploaded file)
+Sample Response BOdy: {
+    "data": {
+        "task_id": "be09d496-a892-4b4d-a523-38848ae80578"
+    },
+    "status": "success"
+}
+```
+
 ### GET /api/v1/task_status/<task_id>
 - **Description**:- Checks the status of a background task.
 - **Parameters**:- task_id (required): The ID of the task to check.
@@ -85,19 +96,36 @@ assistive_reading_device/
     - 404 Not Found: If the task ID is invalid.
     - 500 Internal Server Error: If an unexpected error occurs.
 
+```bash
+GET API : http://localhost:8000/api/v1/task_status/be09d496-a892-4b4d-a523-38848ae80578
+Sample Response BOdy: {
+    "data": {
+        "download_url": "http://localhost:8000/static/uploads/static/uploads/Welcome.mp3",
+        "result": "static/uploads/Welcome.mp3",
+        "state": "SUCCESS",
+        "status": "Task completed!"
+    },
+    "status": "success"
+}
+```
+
+
 ## Environmental Variables
 
-- FLASK_ENV: The environment in which the app is running (development, production).
-- SECRET_KEY: A secret key for securing sessions and cookies.
-- UPLOAD_FOLDER: Directory for storing uploaded images (static/uploads).
-- ALLOWED_EXTENSIONS: Allowed file extensions for upload ('png', 'jpg', 'jpeg', 'gif').
-- LOG_FILE: Path to the log file (logs/app.log).
-- BROKER_URL: URL of the message broker (redis://redis:6379/0 for Docker).
-- RESULT_BACKEND: Backend for storing task results (redis://redis:6379/0 for Docker).
+- **FLASK_ENV**: The environment in which the app is running (`development`, `production`).
+- **SECRET_KEY**: A secret key for securing sessions and cookies, used by Flask.
+- **UPLOAD_FOLDER**: Directory for storing uploaded images (default: `static/uploads`).
+- **ALLOWED_EXTENSIONS**: Allowed file extensions for upload (e.g., `png`, `jpg`, `jpeg`, `gif`).
+- **LOG_FILE**: Path to the log file where application logs will be stored (default: `logs/app.log`).
+- **BROKER_URL**: URL of the message broker (e.g., `redis://redis:6379/0` for Redis running in Docker).
+- **RESULT_BACKEND**: Backend for storing task results (e.g., `redis://redis:6379/0` for Redis running in Docker).
+- **TESSERACT_CMD**: The file path to the Tesseract OCR executable (e.g., `/usr/bin/tesseract` for Docker). This variable is required for the OCR processing component to locate Tesseract.
+
 
 ## Contributing
 
 Contributions are welcome! Please submit a pull request or open an issue to discuss improvements or bugs.
+
 
 ## License
 
