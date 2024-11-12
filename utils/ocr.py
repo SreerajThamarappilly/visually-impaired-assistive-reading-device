@@ -1,8 +1,10 @@
+# utils/ocr.py
+
 import pytesseract
 from PIL import Image
 import cv2
 import os
-from celery import current_app as celery_app  # Import Celery's current app
+from celery import current_app as celery_app
 
 class OCRProcessor:
     """

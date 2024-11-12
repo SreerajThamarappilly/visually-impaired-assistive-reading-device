@@ -18,6 +18,8 @@ RUN apt-get update && apt-get install -y \
     pkg-config \
     poppler-utils \
     libgl1 \
+    espeak \
+    ffmpeg \
     && rm -rf /var/lib/apt/lists/*
 
 # Install Python dependencies

@@ -1,3 +1,5 @@
+# app.py
+
 from flask import Flask, request, jsonify, url_for
 from werkzeug.utils import secure_filename
 import os
@@ -24,11 +26,11 @@ def make_celery(app):
     )
     # Explicitly set the configuration
     celery.conf.update(app.config)
-    
+
     # Ensure TESSERACT_CMD is set in the Celery worker environment
     if 'TESSERACT_CMD' in app.config:
         celery.conf.update({'TESSERACT_CMD': app.config['TESSERACT_CMD']})
-    
+
     return celery
 
 # Initialize Celery
@@ -111,6 +113,9 @@ def process_image_task(self, image_path, filename):
     tts_processor = TTSProcessor()
 
     try:
+        # Initial state update
+        self.update_state(state='PROGRESS', meta={'status': 'Starting task...'})
+
         # Extract text from image
         self.update_state(state='PROGRESS', meta={'status': 'Extracting text from image...'})
         extracted_text = ocr_processor.extract_text(image_path)
@@ -121,6 +126,7 @@ def process_image_task(self, image_path, filename):
         audio_filename = tts_processor.text_to_speech(extracted_text, filename)
         logging.info(f'Audio file created at: {audio_filename}')
 
+        # Final state update
         return {'status': 'Task completed!', 'result': audio_filename}
     except Exception as e:
         logging.exception('Error processing the image')

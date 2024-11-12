@@ -2,28 +2,35 @@
 
 This project is an Assistive Reading Device for the Visually Impaired. It is a backend service that accepts images containing text, processes the image to extract the text using Optical Character Recognition (OCR), converts the extracted text into speech, and returns an audio file.
 
+
 ## Features
 
 - **Image Upload**: Accepts images via a RESTful API.
 - **Asynchronous Processing**: Uses Celery and Redis for asynchronous task handling.
-- **OCR Processing**: Extracts text from images using OCR.
-- **Text-to-Speech Conversion**: Converts extracted text into speech.
+- **OCR Processing**: Extracts text from images using Tesseract OCR.
+- **Text-to-Speech Conversion**: Converts extracted text into speech using `gTTS`.
 - **Audio Response**: Returns the speech as an audio file.
-- **Dockerized Deployment**: Easily deployable using Docker.
-- **Scalable Architecture**: Suitable for cloud deployment and scaling.
+- **Advanced Image Preprocessing**: Uses OpenCV for enhanced OCR accuracy.
+- **Logging**: Tracks processing steps in a log file.
+- **Dockerized Deployment**: Easily deployable using Docker for consistent environment replication.
+- **Scalable Architecture**: Suitable for cloud deployment and scaling (GCP, AWS, etc.).
 
 
 ## Technologies Used
 
 - **Python Flask**: Web framework for handling HTTP requests.
-- **Celery**: Asynchronous task queue.
-- **Redis**: Message broker for Celery.
-- **Tesseract OCR**: For text recognition.
-- **pyttsx3**: For offline text-to-speech conversion.
-- **Pillow (PIL)**: For image processing.
-- **OpenCV**: For advanced image preprocessing.
-- **Gunicorn**: WSGI server for deployment.
-- **Docker & Docker Compose**: For containerization and orchestration.
+- **Celery**: Asynchronous task queue for managing background processing.
+- **Redis**: Message broker for Celery, enabling asynchronous communication.
+- **Tesseract OCR**: Optical Character Recognition (OCR) for extracting text from images.
+- **gTTS (Google Text-to-Speech)**: For online text-to-speech conversion.
+- **ffmpeg**: Used with gTTS to handle audio file formatting.
+- **Pillow (PIL)**: For image handling and basic transformations.
+- **OpenCV**: For advanced image preprocessing to improve OCR accuracy.
+- **Gunicorn**: WSGI server for deploying Flask applications in production.
+- **Docker & Docker Compose**: Containerization for easy deployment and scalability.
+- **python-dotenv**: Loads environment variables from a `.env` file for secure configuration.
+- **Logging**: Stores application logs in `logs/app.log` for monitoring and debugging.
+
 
 ## Directory Structure
 
@@ -43,7 +50,6 @@ assistive_reading_device/
 │   └── tts.py
 ├── static/
 │   └── uploads/
-├── templates/
 └── logs/
     └── app.log
 
@@ -59,6 +65,7 @@ assistive_reading_device/
 - **static/uploads/**: Directory for uploaded images and audio files.
 - **logs/app.log**: Log file for application logs.
 ```
+
 
 ## API Endpoints
 
