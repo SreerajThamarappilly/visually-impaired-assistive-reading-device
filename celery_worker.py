@@ -1,3 +1,5 @@
+# celery_worker.py
+
 from app import celery
 
 # Start the Celery worker
